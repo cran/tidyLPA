@@ -4,42 +4,10 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ---- echo = F-----------------------------------------------------------
-library(tibble)
-
-iris_log_lik_2_profiles <- tribble(
-    ~model, ~mplus, ~mclust,
-    1, 488.915, 488.915,
-    2, 296.448, 296.448,
-    3, 386.185, 386.185,
-    5, 214.355, 214.355
-)
-
-iris_log_lik_3_profiles <- tribble(
-    ~model, ~mplus, ~mclust,
-    1, 361.426, 361.429,
-    2, 256.354, 256.355,
-    3, 307.178, 307.181,
-    6, 180.185, 180.186
-)
-
-geyser_log_lik_2_profiles <- tribble(
-    ~model, ~mplus, ~mclust,
-    1, 1157.68, 1157.68,
-    2, 1140.187, 1140.187,
-    3, 1147.806, 1147.806,
-    6, 1130.264, 1130.264
-)
-
-## ------------------------------------------------------------------------
-iris_log_lik_2_profiles
-iris_log_lik_3_profiles
-geyser_log_lik_2_profiles
-
 ## ---- eval = F-----------------------------------------------------------
 #  install.packages("tidyLPA")
 
-## ---- eval = F-----------------------------------------------------------
+## ----gh-installation, eval = FALSE---------------------------------------
 #  install.packages("devtools")
 #  devtools::install_github("jrosen48/tidyLPA")
 
@@ -63,10 +31,22 @@ plot_profiles(m3)
 plot_profiles(m3, to_center = TRUE, to_scale = TRUE)
 
 ## ------------------------------------------------------------------------
+library(dplyr, warn.conflicts = FALSE)
+
+estimate_profiles(d, 
+                  broad_interest, enjoyment, self_efficacy, 
+                  n_profiles = 3, 
+                  model = 2) %>% 
+    plot_profiles(to_center = TRUE)
+
+## ------------------------------------------------------------------------
 estimate_profiles(d,
                   broad_interest, enjoyment, self_efficacy,
                   model = 1,
                   n_profiles = 4)
+
+## ------------------------------------------------------------------------
+attributes(m3)$mclust_output$parameters
 
 ## ------------------------------------------------------------------------
 m3_mclust <- estimate_profiles(d, 
@@ -88,7 +68,7 @@ m3_processed_raw <- estimate_profiles(d,
 
 ## ------------------------------------------------------------------------
 estimate_profiles(d, 
-                  broad_interest, enjoyment, self_efficacy, 
+                  broad_interest, enjoyment,
                   model = 1, 
                   n_profiles = 4, 
                   return_orig_df = TRUE)

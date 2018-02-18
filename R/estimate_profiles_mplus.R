@@ -1,4 +1,4 @@
-#' Create models for a specific mclust model
+#' Estimate parameters for profiles for a specific solution (requires purchasing and installing MPlus to use)
 #' @details Creates an mplus model (.inp) and associated data file (.dat)
 #' @param data_filename name of data file to prepare; defaults to d.dat
 #' @param script_filename name of script to prepare; defaults to i.inp
@@ -74,7 +74,7 @@ estimate_profiles_mplus <- function(df,
     ANALYSIS_line5 <- paste0("convergence = ", convergence_criterion, ";")
 
     if (is.null(optseed)) {
-        ANALYSIS_line6 <- ""
+        ANALYSIS_line6 <- NULL
     } else {
         ANALYSIS_line6 <- paste0("optseed = ", optseed, ";")
     }
@@ -292,9 +292,15 @@ estimate_profiles_mplus <- function(df,
     x <- utils::capture.output(MplusAutomation::runModels(target = paste0(getwd(), "/", script_filename)))
     capture <- utils::capture.output(m1 <- MplusAutomation::readModels(target = paste0(getwd(), "/", output_filename)))
 
-    message("LogLik is ", round(abs(as.vector(m1$summaries$LL)), 3))
-    message("BIC is ", round(abs(as.vector(m1$summaries$BIC)), 3))
-    message("Entropy is ", round(abs(as.vector(m1$summaries$Entropy)), 3))
+    status <- try_extract_fit(m1)
+
+    if (any(c("Convergence problem", "LL not replicated") %in% status)) {
+        message(status)
+    } else {
+        message("LogLik is ", round(abs(as.vector(status$LL)), 3))
+        message("BIC is ", round(abs(as.vector(status$BIC)), 3))
+        message("Entropy is ", round(abs(as.vector(status$Entropy)), 3))
+    }
 
     if (print_input_file == TRUE) {
         # f <- paste0(script_filename)
@@ -303,8 +309,8 @@ estimate_profiles_mplus <- function(df,
     }
 
     if (return_save_data == TRUE) {
-        # message("This first list item is the model output and the second is the save data with class probabilities.")
-        x <- dplyr::tbl_df(MplusAutomation::getSavedata_Data(paste0(getwd(), "/", output_filename)))
+        x <- dplyr::tbl_df(m1$savedata)
+        # x <- dplyr::tbl_df(MplusAutomation::getSavedata_Data(paste0(getwd(), "/", output_filename)))
 
         if (remove_tmp_files == TRUE) {
             file.remove(data_filename)
@@ -313,7 +319,7 @@ estimate_profiles_mplus <- function(df,
             file.remove(savedata_filename)
             file.remove("Mplus Run Models.log")
         }
-        invisible(x)
+        return(x)
 
         # invisible(list(m1, x))
     } else {
@@ -324,7 +330,7 @@ estimate_profiles_mplus <- function(df,
             file.remove("Mplus Run Models.log")
         }
 
-        invisible(m1)
+        return(m1)
     }
 }
 
