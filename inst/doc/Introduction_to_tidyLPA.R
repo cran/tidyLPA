@@ -40,6 +40,14 @@ estimate_profiles(d,
     plot_profiles(to_center = TRUE)
 
 ## ------------------------------------------------------------------------
+m3 <- estimate_profiles(d, 
+                        broad_interest, enjoyment, self_efficacy, 
+                        model = 1,
+                        n_profiles = 3, to_return = "mclust")
+
+plot_profiles(m3, plot_what = "mclust")
+
+## ------------------------------------------------------------------------
 estimate_profiles(d,
                   broad_interest, enjoyment, self_efficacy,
                   model = 1,
@@ -75,6 +83,14 @@ estimate_profiles(d,
 
 ## ---- eval = F-----------------------------------------------------------
 #  compare_solutions_mplus(d, broad_interest, enjoyment, self_efficacy)
+
+## ------------------------------------------------------------------------
+if (require('parallel')) {
+  parallel::detectCores()
+}
+
+## ---- eval = F-----------------------------------------------------------
+#  compare_solutions_mplus(d, broad_interest, enjoyment, self_efficacy, n_processors = 4)
 
 ## ---- eval = F-----------------------------------------------------------
 #  m1 <- estimate_profiles_mplus(d,

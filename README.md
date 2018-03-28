@@ -18,12 +18,14 @@ You can install tidyLPA (version 0.1.2) from CRAN with:
 install.packages("tidyLPA")
 ```
 
-You can also install the in-development version of tidyLPA from GitHub with:
+You can also install the development version of tidyLPA from GitHub with:
 
 ``` r
 install.packages("devtools")
 devtools::install_github("jrosen48/tidyLPA")
 ```
+
+**Please note that some functions documented on the References page may only be available in the development version of tidyLPA. Also note that if an error occurs, you may try the development version to see if the issue is addressed.**
 
 Example
 -------
@@ -75,16 +77,6 @@ Two additional models can be fit using functions that provide an interface to th
 We can plot the profiles with by *piping* (using the `%>%` operator, loaded from the `dplyr` package) the output to `plot_profiles()`.
 
 ``` r
-library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-
 estimate_profiles(d, 
                   broad_interest, enjoyment, self_efficacy, 
                   n_profiles = 3, 
@@ -112,8 +104,9 @@ Contact
 
 As tidyLPA is at an early stage of its development, issues should be expected. If you have any questions or feedback, please do not hesitate to get in touch:
 
--   By [email (jrosen@msu.edu)](mailto:jrosen@msu.edu)
--   By [Twitter](http://twitter.com/jrosenberg6432)
+-   Via [the tidyLPA group](https://groups.google.com/forum/#!forum/tidylpa) on Google Groups (preferred)
 -   Through filing an issue on GitHub [here](https://github.com/jrosen48/tidyLPA)
+-   Via [Twitter](http://twitter.com/jrosenberg6432)
+-   By [email (jrosen@msu.edu)](mailto:jrosen@msu.edu)
 
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.

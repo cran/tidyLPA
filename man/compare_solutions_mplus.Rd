@@ -4,17 +4,20 @@
 \alias{compare_solutions_mplus}
 \title{Explore BIC for various models and numbers of profiles using MPlus (requires purchasing and installing MPlus to use)}
 \usage{
-compare_solutions_mplus(df, ..., n_profiles_max = 10, model = 1:6,
-  starts = c(20, 4), m_iterations = 500, st_iterations = 10,
-  convergence_criterion = 1e-06, save_models = NULL, return_table = FALSE,
-  n_processors = 1)
+compare_solutions_mplus(df, ..., n_profiles_min = 2, n_profiles_max = 10,
+  model = 1:6, starts = c(20, 4), m_iterations = 500,
+  st_iterations = 10, convergence_criterion = 1e-06, save_models = FALSE,
+  return_table = TRUE, n_processors = 1, return_stats_df = FALSE,
+  include_LMR = TRUE, include_BLRT = FALSE)
 }
 \arguments{
 \item{df}{data.frame with two or more columns with continuous variables}
 
 \item{...}{unquoted variable names separated by commas}
 
-\item{n_profiles_max}{a vector with the range of the number of mixture components to explore; defaults to 2 through 10 (2:10)}
+\item{n_profiles_min}{lower bound of the number of profiles to explore; defaults to 2}
+
+\item{n_profiles_max}{upper bound of the number of profiles to explore; defaults to 10}
 
 \item{model}{which models to include; defaults to 1:6 (see https://jrosen48.github.io/tidyLPA/articles/Introduction_to_tidyLPA.html)}
 
@@ -26,11 +29,17 @@ compare_solutions_mplus(df, ..., n_profiles_max = 10, model = 1:6,
 
 \item{convergence_criterion}{convergence criterion for the Quasi-Newton algorithm for continuous outcomes; defaults to 1E-6 (.000001); can be set more conservatively to 1E-7 (.0000001)}
 
-\item{save_models}{whether to save the models as an rds file (i.e., set to "output.rds" to save the models with this filename)}
+\item{save_models}{whether to save the models as rds files}
 
 \item{return_table}{logical (TRUE or FALSE) for whether to return a table of the output instead of a plot; defaults to FALSE}
 
 \item{n_processors}{= 1}
+
+\item{return_stats_df}{whether to return a list of fit statistics for the solutions explored; defaults to FALSE}
+
+\item{include_LMR}{whether to include the Lo-Mendell-Rubin likelihood-ratio test; defaults to TRUE}
+
+\item{include_BLRT}{whether to include the bootstrapped LRT; defaults to FALSE because of the time this takes to run}
 }
 \value{
 a list with a data.frame with the BIC values and a list with all of the model output; if save_models is the name of an rds file (i.e., "out.rds"), then the model output will be written with that filename and only the data.frame will be returned

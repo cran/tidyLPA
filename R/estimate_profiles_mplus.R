@@ -13,6 +13,8 @@
 #' @param print_input_file whether to print the input file to the console
 #' @param return_save_data whether to return the save data (with the original data and the posterior probabilities for the classes and the class assignment) as a data.frame along with the MPlus output; defaults to TRUE
 #' @param optseed random seed for analysis
+#' @param include_LMR whether to include the Lo-Mendell-Rubin likelihood-ratio test; defaults to TRUE
+#' @param include_BLRT whether to include the bootstrapped LRT; defaults to FALSE because of the time this takes to run
 #' @param n_processors = 1
 #' @inheritParams estimate_profiles
 #' @import dplyr
@@ -20,7 +22,7 @@
 #' @importFrom tibble tibble
 #' @examples
 #' \dontrun{
-#' m1 <- estimate_profiles_mplus(iris,
+#' m <- estimate_profiles_mplus(iris,
 #'                             Sepal.Length, Sepal.Width, Petal.Length, Petal.Width,
 #'                             n_profiles = 2,
 #'                             model = 1)
@@ -45,8 +47,10 @@ estimate_profiles_mplus <- function(df,
                                     print_input_file = FALSE,
                                     return_save_data = TRUE,
                                     optseed = NULL,
-                                    n_processors = 1) {
-    message("Note that this (and other functions that use MPlus) is at the experimental stage! Please provide feedback at https://github.com/jrosen48/tidyLPA")
+                                    n_processors = 1,
+                                    include_LMR = TRUE,
+                                    include_BLRT = FALSE) {
+    message("Note that this and other functions that use MPlus are at the experimental stage! Please provide feedback at https://github.com/jrosen48/tidyLPA")
 
     d <- select_ancillary_functions_mplus(df, ...)
     x <- utils::capture.output(suppressWarnings(MplusAutomation::prepareMplusData(d, data_filename, inpfile = FALSE)))
@@ -87,7 +91,18 @@ estimate_profiles_mplus <- function(df,
     MODEL_overall_line1 <- paste0("[", unquoted_variable_name, "];")
     MODEL_overall_line2 <- paste0(unquoted_variable_name, ";")
 
-    OUTPUT_line0 <- "OUTPUT: TECH1 TECH11;"
+    if (include_LMR == TRUE) {
+        OUTPUT_line0 <- "OUTPUT: TECH1 TECH11;"
+        if (include_BLRT == TRUE) {
+            OUTPUT_line0 <- "OUTPUT: TECH1 TECH11 TECH14;"
+        }
+    } else {
+        OUTPUT_line0 <- "OUTPUT: TECH1;"
+        if (include_BLRT == TRUE) {
+            OUTPUT_line0 <- "OUTPUT: TECH1  TECH14;"
+        }
+    }
+
     SAVEDATA_line0 <- paste0("SAVEDATA: File is ", savedata_filename, ";")
     SAVEDATA_line1 <- "SAVE = CPROBABILITIES;"
 
@@ -290,26 +305,39 @@ estimate_profiles_mplus <- function(df,
     )
 
     x <- utils::capture.output(MplusAutomation::runModels(target = paste0(getwd(), "/", script_filename)))
-    capture <- utils::capture.output(m1 <- MplusAutomation::readModels(target = paste0(getwd(), "/", output_filename)))
+    capture <- utils::capture.output(m <- MplusAutomation::readModels(target = paste0(getwd(), "/", output_filename)))
 
-    status <- try_extract_fit(m1)
-
-    if (any(c("Convergence problem", "LL not replicated") %in% status)) {
-        message(status)
+    if (check_warnings(m, "WARNING:  THE BEST LOGLIKELIHOOD VALUE WAS NOT REPLICATED.  THE") == "Warning: The best loglikelihood was not replicated") {
+        warning_status <- "Warning: LL not replicated"
     } else {
-        message("LogLik is ", round(abs(as.vector(status$LL)), 3))
-        message("BIC is ", round(abs(as.vector(status$BIC)), 3))
-        message("Entropy is ", round(abs(as.vector(status$Entropy)), 3))
+        warning_status <- ""
+    }
+
+    if (check_errors(m, "THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY DUE TO AN INSUFFICIENT") == "Error: Convergence issue" |
+        check_errors(m, "THE LOGLIKELIHOOD DECREASED IN THE LAST EM ITERATION.  CHANGE YOUR MODEL") == "Error: Convergence issue" |
+        check_errors(m, "THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY.  ESTIMATES CANNOT") == "Error: Convergence issue" |
+        check_errors(m, "THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY DUE TO AN ERROR IN THE") == "Error: Convergence issue") {
+        error_status <- "Error: Convergence issue"
+    } else {
+        error_status <- ""
+    }
+
+    if (error_status == "Error: Convergence issue" | warning_status == "Warning: LL not replicated") {
+        message(stringr::str_trim(stringr::str_c(warning_status, " ", error_status)))
+        return(stringr::str_trim(stringr::str_c(warning_status, " ", error_status)))
+    } else {
+        message("LogLik is ", round(abs(as.vector(m$summaries$LL)), 3))
+        message("BIC is ", round(abs(as.vector(m$summaries$BIC)), 3))
+        message("Entropy is ", round(abs(as.vector(m$summaries$Entropy)), 3))
     }
 
     if (print_input_file == TRUE) {
-        # f <- paste0(script_filename)
         print(readr::read_lines(script_filename))
         message("Note: This function currently prints the script output. You can also use the argument remove_tmp_files = FALSE to create the inp file, which you can then view in R Studio by clicking on the file name in the Files pane.")
     }
 
     if (return_save_data == TRUE) {
-        x <- dplyr::tbl_df(m1$savedata)
+        x <- dplyr::tbl_df(m$savedata)
         # x <- dplyr::tbl_df(MplusAutomation::getSavedata_Data(paste0(getwd(), "/", output_filename)))
 
         if (remove_tmp_files == TRUE) {
@@ -321,7 +349,6 @@ estimate_profiles_mplus <- function(df,
         }
         return(x)
 
-        # invisible(list(m1, x))
     } else {
         if (remove_tmp_files == TRUE) {
             file.remove(data_filename)
@@ -330,7 +357,7 @@ estimate_profiles_mplus <- function(df,
             file.remove("Mplus Run Models.log")
         }
 
-        return(m1)
+        return(m)
     }
 }
 
@@ -342,4 +369,24 @@ estimate_profiles_mplus <- function(df,
 
 extract_mplus_summary <- function(x) {
     x$summaries[c("LL", "BIC", "Entropy")]
+}
+
+check_list <- function(x, check) {
+    x[1] == check
+}
+
+check_warnings <- function(x, check) {
+    if (any(purrr::map_lgl(x$warnings, check_list, check = check))) {
+        return(stringr::str_c("Warning: ", "The best loglikelihood was not replicated"))
+    } else {
+        return("No warning")
+    }
+}
+
+check_errors <- function(x, check) {
+    if (any(purrr::map_lgl(x$errors, check_list, check = check))) {
+        return(stringr::str_c("Error: ", "Convergence issue"))
+    } else {
+        return("No error")
+    }
 }
