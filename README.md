@@ -1,6 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![Build Status](https://travis-ci.org/jrosen48/tidyLPA.svg?branch=master)](https://travis-ci.org/jrosen48/tidyLPA)
+[![Build Status](https://travis-ci.org/jrosen48/tidyLPA.svg?branch=master)](https://travis-ci.org/jrosen48/tidyLPA) <!-- [![CRAN status](https://www.r-pkg.org/badges/version/tidyLPA)](https://cran.r-project.org/package=tidyLPA) --> <!-- [![](https://cranlogs.r-pkg.org/badges/tidyLPA)](https://cran.r-project.org/package=tidyLPA) --> <!-- [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing) -->
 
 Background
 ----------
@@ -12,7 +12,7 @@ tidyLPA provides the functionality to carry out LPA in R. In particular, tidyLPA
 Installation
 ------------
 
-You can install tidyLPA (version 0.1.2) from CRAN with:
+You can install tidyLPA from CRAN with:
 
 ``` r
 install.packages("tidyLPA")
@@ -24,8 +24,6 @@ You can also install the development version of tidyLPA from GitHub with:
 install.packages("devtools")
 devtools::install_github("jrosen48/tidyLPA")
 ```
-
-**Please note that some functions documented on the References page may only be available in the development version of tidyLPA. Also note that if an error occurs, you may try the development version to see if the issue is addressed.**
 
 Example
 -------
@@ -41,54 +39,76 @@ d <- pisaUSA15[1:100, ]
 
 estimate_profiles(d, 
                   broad_interest, enjoyment, self_efficacy, 
-                  n_profiles = 3, 
-                  model = 2)
-#> Fit varying means, equal variances and covariances (Model 2) model with 3 profiles.
-#> LogLik is 279.692
-#> BIC is 636.62
-#> Entropy is 0.798
+                  n_profiles = 3)
+#> Fit NA model with 3 profiles.
+#> LogLik is 283.991
+#> BIC is 631.589
+#> Entropy is 0.914
 #> # A tibble: 94 x 5
 #>    broad_interest enjoyment self_efficacy profile posterior_prob
 #>             <dbl>     <dbl>         <dbl> <fct>            <dbl>
-#>  1           3.80      4.00          1.00 1                0.976
-#>  2           3.00      3.00          2.75 2                0.847
-#>  3           1.80      2.80          3.38 2                0.982
-#>  4           1.40      1.00          2.75 3                0.963
-#>  5           1.80      2.20          2.00 3                0.824
-#>  6           1.60      1.60          1.88 3                0.960
-#>  7           3.00      3.80          2.25 1                0.847
-#>  8           2.60      2.20          2.00 3                0.704
-#>  9           1.00      2.80          2.62 3                0.584
-#> 10           2.20      2.00          1.75 3                0.861
+#>  1            3.8       4            1    1                1.000
+#>  2            3         3            2.75 3                0.917
+#>  3            1.8       2.8          3.38 3                0.997
+#>  4            1.4       1            2.75 2                0.899
+#>  5            1.8       2.2          2    3                0.997
+#>  6            1.6       1.6          1.88 3                0.997
+#>  7            3         3.8          2.25 1                0.927
+#>  8            2.6       2.2          2    3                0.990
+#>  9            1         2.8          2.62 3                0.998
+#> 10            2.2       2            1.75 3                0.996
 #> # ... with 84 more rows
 ```
 
 See the output is simply a data frame with the profile (and its posterior probability) and the variables used to create the profiles (this is the "tidy" part, in that the function takes and returns a data frame).
 
-In addition to the number of profiles (specified with the `n_profiles` argument), the model is important. The `model` argument allows for four models to be specified:
-
--   Varying means, equal variances, and covariances fixed to 0 (model 1)
--   Varying means, equal variances, and equal covariances (model 2)
--   Varying means, varying variances, and covariances fixed to 0 (model 3)
--   Varying means, varying variances, and varying covariances (model 6)
-
-Two additional models can be fit using functions that provide an interface to the MPlus software. More information on the models can be found in the [vignette](https://jrosen48.github.io/tidyLPA/articles/Introduction_to_tidyLPA.html).
-
 We can plot the profiles with by *piping* (using the `%>%` operator, loaded from the `dplyr` package) the output to `plot_profiles()`.
+
+``` r
+library(dplyr, warn.conflicts = FALSE)
+
+estimate_profiles(d, 
+                  broad_interest, enjoyment, self_efficacy, 
+                  n_profiles = 3) %>% 
+    plot_profiles(to_center = TRUE)
+#> Fit NA model with 3 profiles.
+#> LogLik is 283.991
+#> BIC is 631.589
+#> Entropy is 0.914
+```
+
+![](man/figures/README-unnamed-chunk-5-1.png)
+
+Model specification
+-------------------
+
+In addition to the number of profiles (specified with the `n_profiles` argument), the model can be specified in terms of whether and how the variable variances and covariances are estimated.
+
+The models are specified by passing arguments to the `variance` and `covariance` arguments. The possible values for these arguments are:
+
+-   `variances`: "equal" and "zero"
+-   `covariances`: "varying", "equal", and "zero"
+
+If no values are specified for these, then the equal variances and covariances fixed to 0 model is specified by default.
+
+These arguments allow for four models to be specified:
+
+-   Equal variances and covariances fixed to 0 (Model 1)
+-   Varying variances and covariances fixed to 0 (Model 2)
+-   Equal variances and equal covariances (Model 3)
+-   Varying variances and varying covariances (Model 6)
+
+Two additional models (Models 4 and 5) can be fit using functions that provide an interface to the MPlus software. More information on the models can be found in the [vignette](https://jrosen48.github.io/tidyLPA/articles/Introduction_to_tidyLPA.html).
+
+Here is an example of specifying a model with varying variances and covariances (Model 6; not run here):
 
 ``` r
 estimate_profiles(d, 
                   broad_interest, enjoyment, self_efficacy, 
-                  n_profiles = 3, 
-                  model = 2) %>% 
-    plot_profiles(to_center = TRUE)
-#> Fit varying means, equal variances and covariances (Model 2) model with 3 profiles.
-#> LogLik is 279.692
-#> BIC is 636.62
-#> Entropy is 0.798
+                  variances = "varying",
+                  covariances = "varying",
+                  n_profiles = 3)
 ```
-
-![](man/figures/README-unnamed-chunk-5-1.png)
 
 More information
 ----------------
@@ -99,14 +119,14 @@ To learn more:
 
 -   *Read the Introduction to tidyLPA* [vignette](https://jrosen48.github.io/tidyLPA/articles/Introduction_to_tidyLPA.html), which has much more information on the models that can be specified with tidyLPA and on additional functionality
 
-Contact
--------
+Contributing and Contact Information
+------------------------------------
 
-As tidyLPA is at an early stage of its development, issues should be expected. If you have any questions or feedback, please do not hesitate to get in touch:
+One of the easiest but also most important ways to contribute is to post a question or to provide feedback. Both positive *and* negative feedback is welcome and helpful. You can get in touch by . . .
 
--   Via [the tidyLPA group](https://groups.google.com/forum/#!forum/tidylpa) on Google Groups (preferred)
--   Through filing an issue on GitHub [here](https://github.com/jrosen48/tidyLPA)
--   Via [Twitter](http://twitter.com/jrosenberg6432)
--   By [email (jrosen@msu.edu)](mailto:jrosen@msu.edu)
+-   Sending a message via <tidylpa@googlegroups.com> or view the [the tidyLPA group page](https://groups.google.com/forum/#!forum/tidylpa) (*preferred*)
+-   Filing an issue on GitHub [here](https://github.com/jrosen48/tidyLPA)
+
+Contributions are also welcome via by making pull requests (PR), e.g. through [this page on GitHub](https://github.com/jrosen48/tidyLPA/pulls). It may be easier if you first file an issue outlining what you will do in the PR. You can also reach out via the methods described above.
 
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.

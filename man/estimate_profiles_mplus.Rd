@@ -4,13 +4,15 @@
 \alias{estimate_profiles_mplus}
 \title{Estimate parameters for profiles for a specific solution (requires purchasing and installing MPlus to use)}
 \usage{
-estimate_profiles_mplus(df, ..., n_profiles, the_title = "test",
+estimate_profiles_mplus(df, ..., n_profiles, idvar = NULL,
   data_filename = "d.dat", script_filename = "i.inp",
-  output_filename = "i.out", savedata_filename = "d-mod.dat", model = 1,
-  starts = c(20, 4), m_iterations = 500, st_iterations = 10,
+  output_filename = "i.out", savedata_filename = "d-mod.dat",
+  variances = "equal", covariances = "zero", model = NULL,
+  starts = c(100, 10), m_iterations = 500, st_iterations = 20,
   convergence_criterion = 1e-06, remove_tmp_files = TRUE,
   print_input_file = FALSE, return_save_data = TRUE, optseed = NULL,
-  n_processors = 1, include_LMR = TRUE, include_BLRT = FALSE)
+  n_processors = 1, cluster_ID = NULL, include_VLMR = TRUE,
+  include_BLRT = FALSE, return_all_stats = FALSE)
 }
 \arguments{
 \item{df}{data.frame with two or more columns with continuous variables}
@@ -19,7 +21,7 @@ estimate_profiles_mplus(df, ..., n_profiles, the_title = "test",
 
 \item{n_profiles}{the number of profiles (or mixture components) to be estimated}
 
-\item{the_title}{title of the model; defaults to test}
+\item{idvar}{optional name of the column to be used as the ID variable (should be supplied as a string). Defaults to \code{NULL}, in which case row numbers will be used. Note the ID can be numeric or string, but must be unique.}
 
 \item{data_filename}{name of data file to prepare; defaults to d.dat}
 
@@ -29,7 +31,11 @@ estimate_profiles_mplus(df, ..., n_profiles, the_title = "test",
 
 \item{savedata_filename}{name of the output for the save data (with the original data conditional probabilities); defaults to o-mod.out}
 
-\item{model}{the mclust model to explore: 1 (varying means, equal variances, and residual covariances fixed to 0); 2 (varying means, equal variances and covariances; 3 (varying means and variances, covariances fixed to 0), 4 (varying means and covariances, equal variances; can only be specified in Mplus); 5 (varying means, equal variances, varying covariances); and 6 (varying means, variances, and covariances), in order least to most freely-estimated; see the introductory vignette for more information}
+\item{variances}{how the variable variances are estimated; defaults to "equal" (to be constant across profiles); other option is "varying" (to be varying across profiles)}
+
+\item{covariances}{how the variable covariances are estimated; defaults to "zero" (to not be estimated, i.e. for the covariance matrix to be diagonal); other options are "varying" (to be varying across profiles) and "equal" (to be constant across profiles)}
+
+\item{model}{which model to estimate (DEPRECATED; use variances and covariances instead)}
 
 \item{starts}{number of initial stage starts and number of final stage optimizations; defaults to c(20, 4); can be set to be more conservative to c(500, 50)}
 
@@ -49,9 +55,13 @@ estimate_profiles_mplus(df, ..., n_profiles, the_title = "test",
 
 \item{n_processors}{= 1}
 
-\item{include_LMR}{whether to include the Lo-Mendell-Rubin likelihood-ratio test; defaults to TRUE}
+\item{cluster_ID}{clustering variable (i.e., if data are from students clustered into distinct classrooms) to be used as cluster variables as part of the type = complex option}
+
+\item{include_VLMR}{whether to include the Vu-Lo-Mendell-Rubin likelihood-ratio test; defaults to TRUE}
 
 \item{include_BLRT}{whether to include the bootstrapped LRT; defaults to FALSE because of the time this takes to run}
+
+\item{return_all_stats}{defaults to FALSE; if TRUE, returns as a one-row data frame all of the statistics returned from compare_solutions_mplus()}
 }
 \value{
 either a tibble or a ggplot2 plot of the BIC values for the explored models
@@ -66,7 +76,6 @@ Creates an mplus model (.inp) and associated data file (.dat)
 \dontrun{
 m <- estimate_profiles_mplus(iris,
                             Sepal.Length, Sepal.Width, Petal.Length, Petal.Width,
-                            n_profiles = 2,
-                            model = 1)
+                            n_profiles = 2)
 }
 }

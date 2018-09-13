@@ -1,38 +1,27 @@
-#' Plot variable means and variances by profile for mclust output
+#' Plot variable means and variances by profile
 #' @details Plot the variable means and variances for data frame output from estimate_profiles()
 #' @param x output from estimate_profiles()
 #' @details Plot the variable means and variances for data frame output from estimate_profiles().
 #' When plot_what is set to 'mclust', the errorbars represent non-parametric
 #' confidence intervals, obtained using bootstrapping (100 samples). Note that
 #' 100 samples might be adequate for plotting, but is low for inference. If the
-#' number of participants per class is highly unbalanced (specifically, if the
-#' number of participants assigned to one class is less than
-#' .5*(1/number of classes), then weighted likelihood bootstrapping is used to
-#' ensure that each case is represented in the bootstrap samples (see O’Hagan,
-#' Murphy, Scrucca, and Gormley, 2015).
+#' number of participants per class is highly unbalanced, then weighted likelihood
+#' bootstrapping is used to ensure that each case is represented in the bootstrap
+#' samples (see O'Hagan, Murphy, Scrucca, and Gormley, 2015).
 #' @param to_center whether to center the data before plotting
 #' @param to_scale whether to scale the data before plotting
 #' @param plot_what whether to plot tibble or mclust output from estimate_profiles(); defaults to tibble
 #' @param plot_error_bars whether to plot error bars (representing the 95 percent confidence interval for the mean of each variable)
 #' @param plot_rawdata whether to plot raw data; defaults to TRUE
 #' @param ci confidence interval to plot (defaults to 0.95)
-#' @import ggplot2
-#' @import dplyr
-#' @import tidyr
-#' @import stringr
-#' @importFrom magrittr %>%
-#' @importFrom rlang .data
-#' @importFrom stats sd
 #' @examples
 #' m3 <- estimate_profiles(iris,
 #'     Sepal.Length, Sepal.Width, Petal.Length, Petal.Width,
-#'     model = 1,
 #'     n_profiles = 3)
 #' plot_profiles(m3)
 #'
 #' m3 <- estimate_profiles(iris,
 #'     Sepal.Length, Sepal.Width, Petal.Length, Petal.Width,
-#'     model = 1,
 #'     n_profiles = 3, to_return = "mclust")
 #' plot_profiles(m3, plot_what = "mclust")
 #' @export
@@ -45,7 +34,7 @@ plot_profiles <- function(x, to_center = F, to_scale = F, plot_what = "tibble", 
       labels = paste0("Profile ", n$profile, " (n = ", n$n, ")")
     ))
     if (plot_error_bars == TRUE) {
-      ci <- stats::qnorm(.5 * (1 - ci))
+      ci <- qnorm(.5 * (1 - ci))
       x %>%
         select(-.data$posterior_prob) %>%
         mutate_at(vars(-.data$profile), center_scale_function, center_raw_data = to_center, scale_raw_data = to_scale) %>%
@@ -71,160 +60,161 @@ plot_profiles <- function(x, to_center = F, to_scale = F, plot_what = "tibble", 
         ggplot(aes_string(x = "profile", y = "mean", fill = "key", ymin = "ymin", ymax = "ymax")) +
         geom_col(position = "dodge") +
         geom_errorbar(position = position_dodge()) +
-        scale_fill_brewer("", type = "qual", palette = 6) +
+        # scale_fill_brewer("", type = "qual", palette = 6) +
         scale_x_discrete("") +
         theme_bw()
     } else {
       x %>%
-        dplyr::select(-.data$posterior_prob) %>%
-        dplyr::mutate_at(vars(-.data$profile), scale, center = to_center, scale = to_scale) %>%
-        dplyr::mutate(profile = as.factor(.data$profile)) %>%
+        select(-.data$posterior_prob) %>%
+        mutate_at(vars(-.data$profile), scale, center = to_center, scale = to_scale) %>%
+        mutate(profile = as.factor(.data$profile)) %>%
         group_by(.data$profile) %>%
         summarize_all(mean) %>%
-        tidyr::gather("key", "val", -.data$profile) %>%
+        gather("key", "val", -.data$profile) %>%
         ggplot(aes_string(x = "profile", y = "val", fill = "key")) +
         geom_col(position = "dodge") +
-        scale_fill_brewer("", type = "qual", palette = 6) +
+        # scale_fill_brewer("", type = "qual", palette = 6) +
         scale_x_discrete("") +
         theme_bw()
     }
   } else if (plot_what == "mclust") {
-      n_classes <- x$G
-      plotdat <- x$parameters$mean
-      if(to_center){
-          plotdat <- plotdat - colMeans(x$data, na.rm = TRUE)
-      }
-      if(to_scale){
-          plotdat <- plotdat / apply(x$data, 2, stats::sd, na.rm = TRUE)
-      }
-      plotdat <- data.frame(Variable = rownames(plotdat), plotdat)
-      names(plotdat)[-1] <- paste0("Value.", 1:n_classes)
-      plotdat <- stats::reshape(
-              plotdat,
-              direction = "long",
-              varying = 2:ncol(plotdat),
-              timevar = "Class"
-          )[ , -4]
-      plotdat$Class <- ordered(plotdat$Class)
-      plotdat$Variable <- ordered(plotdat$Variable, levels = colnames(x$data))
+    n_classes <- x$G
+    plotdat <- x$parameters$mean
+    if (to_center) {
+      plotdat <- plotdat - colMeans(x$data, na.rm = TRUE)
+    }
+    if (to_scale) {
+      plotdat <- plotdat / apply(x$data, 2, sd, na.rm = TRUE)
+    }
+    plotdat <- data.frame(Variable = rownames(plotdat), plotdat)
+    names(plotdat)[-1] <- paste0("Value.", 1:n_classes)
+    plotdat <- reshape(
+      plotdat,
+      direction = "long",
+      varying = 2:ncol(plotdat),
+      timevar = "Class"
+    )[, -4]
+    plotdat$Class <- ordered(plotdat$Class)
+    plotdat$Variable <- ordered(plotdat$Variable, levels = colnames(x$data))
 
-      classplot <- ggplot(NULL)
-      if (plot_rawdata) {
-          rawdata <- x$data
-          if(to_center){
-              rawdata <- sweep(rawdata, 2, colMeans(x$data, na.rm = TRUE), "-")
-          }
-          if(to_scale){
-              rawdata <- sweep(rawdata, 2, apply(x$data, 2, stats::sd, na.rm = TRUE), "/")
-          }
-          rawdata <- data.frame(cbind(x$z, rawdata))
-          names(rawdata)[1:n_classes] <-
-              paste0("Probability.", 1:n_classes)
-          rawdata <- stats::reshape(
-                      rawdata,
-                      direction = "long",
-                      varying = 1:n_classes,
-                      timevar = "Class"
-                  )[ , -(length(names(rawdata)[-grep("^Probability", names(rawdata))])+3)]
-          rawdata$Class <- ordered(rawdata$Class)
-          levels(rawdata$Class) <- 1:n_classes
-          names(rawdata)[1:ncol(x$data)] <-
-              paste0("Value.", gsub("\\.", "_", colnames(x$data)))
-          rawdata <-
-              stats::reshape(
-                  rawdata,
-                  direction = "long",
-                  varying = 1:ncol(x$data),
-                  timevar = "Variable"
-              )
-          rawdata$Variable <- ordered(rawdata$Variable, levels =  gsub("\\.", "_", colnames(x$data)))
-          levels(rawdata$Variable) <- colnames(x$data)
-
-          classplot <- classplot + geom_point(
-              data = rawdata,
-              position = position_jitterdodge(jitter.width = .10),
-              aes_string(
-                  x = "Class",
-                  y = "Value",
-                  colour = "Variable",
-                  alpha = "Probability"
-              )
-          ) +
-              scale_alpha_continuous(guide = FALSE, range = c(0, .1))
+    classplot <- ggplot(NULL)
+    if (plot_rawdata) {
+      rawdata <- x$data
+      if (to_center) {
+        rawdata <- sweep(rawdata, 2, colMeans(x$data, na.rm = TRUE), "-")
       }
-      classplot <-
-          classplot + geom_point(
-              data = plotdat,
-              aes(x = Class, y = Value, colour = Variable),
-              position = position_dodge(width = .75),
-              size = 5,
-              shape = 18
+      if (to_scale) {
+        rawdata <- sweep(rawdata, 2, apply(x$data, 2, sd, na.rm = TRUE), "/")
+      }
+      rawdata <- data.frame(cbind(x$z, rawdata))
+      names(rawdata)[1:n_classes] <-
+        paste0("Probability.", 1:n_classes)
+      rawdata <- reshape(
+        rawdata,
+        direction = "long",
+        varying = 1:n_classes,
+        timevar = "Class"
+      )[, -(length(names(rawdata)[-grep("^Probability", names(rawdata))]) + 3)]
+      rawdata$Class <- ordered(rawdata$Class)
+      levels(rawdata$Class) <- 1:n_classes
+      names(rawdata)[1:ncol(x$data)] <-
+        paste0("Value.", gsub("\\.", "_", colnames(x$data)))
+      rawdata <-
+        reshape(
+          rawdata,
+          direction = "long",
+          varying = 1:ncol(x$data),
+          timevar = "Variable"
+        )
+      rawdata$Variable <- ordered(rawdata$Variable, levels = gsub("\\.", "_", colnames(x$data)))
+      levels(rawdata$Variable) <- colnames(x$data)
+
+      classplot <- classplot + geom_point(
+        data = rawdata,
+        position = position_jitterdodge(jitter.width = .10),
+        aes_string(
+          x = "Class",
+          y = "Value",
+          colour = "Variable",
+          alpha = "Probability"
+        )
+      ) +
+        scale_alpha_continuous(guide = FALSE, range = c(0, .1))
+    }
+    classplot <-
+      classplot + geom_point(
+        data = plotdat,
+        aes(x = Class, y = Value, colour = Variable),
+        position = position_dodge(width = .75),
+        size = 5,
+        shape = 18
+      )
+    # Add errorbars
+    if (!is.null(ci)) {
+      if (any(table(x$classification) / length(x$classification) < .5 * (1 / length(unique(
+        x$classification
+      ))))) {
+        warning(
+          "The number of cases per class is relatively low in some classes. Used weighted likelihood bootstrap to obtain se's."
+        )
+        bootstraps <-
+          MclustBootstrap(x,
+            nboot = 100,
+            type = "wlbs",
+            verbose = FALSE
           )
-      # Add errorbars
-      if (!is.null(ci)) {
-          if (any(table(x$classification) / length(x$classification) < .5 * (1 / length(unique(
-              x$classification
-          ))))) {
-              warning(
-                  "The number of cases per class is relatively low in some classes. Used weighted likelihood bootstrap to obtain se's."
-              )
-              bootstraps <-
-                  mclust::MclustBootstrap(x,
-                                          nboot = 100,
-                                          type = "wlbs",
-                                          verbose = FALSE)
-          } else {
-              bootstraps <-
-                  mclust::MclustBootstrap(x,
-                                          nboot = 100,
-                                          type = "bs",
-                                          verbose = FALSE)
-          }
-
-          ses <- data.frame(apply(bootstraps$mean, 3, function(class) {
-              apply(class, 2, stats::quantile, probs = c((.5 * (1 - ci)), 1 - (.5 * (1 - ci))))
-          }))
-          if(to_center){
-              ses <- ses - rep(colMeans(x$data, na.rm = TRUE), each = 2)
-          }
-          if(to_scale){
-              ses <- ses / rep(apply(x$data, 2, stats::sd, na.rm = TRUE), each = 2)
-          }
-          names(ses) <- paste0("se.", 1:n_classes)
-          ses$Variable <- unlist(lapply(colnames(x$data), rep, 2))
-          ses$boundary <- "lower"
-          ses$boundary[seq(2, nrow(ses), by = 2)] <- "upper"
-          ses <-
-              stats::reshape(
-                  ses,
-                  direction = "long",
-                  varying = 1:n_classes,
-                  timevar = "Class"
-              )
-          ses <-
-              stats::reshape(
-                  ses,
-                  direction = "wide",
-                  idvar = c("Variable", "Class"),
-                  timevar = "boundary"
-              )
-          ses$Variable <- ordered(ses$Variable, levels = colnames(x$data))
-          classplot <-
-              classplot + geom_errorbar(
-                  data = ses,
-                  aes_string(
-                      x = "Class",
-                      colour = "Variable",
-                      ymin = "se.lower",
-                      ymax = "se.upper"
-                  ),
-                  position = position_dodge(width = .75),
-                  width = .4
-              )
+      } else {
+        bootstraps <-
+          MclustBootstrap(x,
+            nboot = 100,
+            type = "bs",
+            verbose = FALSE
+          )
       }
-      classplot + theme_bw() +
-          geom_vline(xintercept = seq(1.5, (n_classes-1)+.5, 1), linetype = 2) +
-          scale_x_discrete(expand = c(0,0))
+
+      ses <- data.frame(apply(bootstraps$mean, 3, function(class) {
+        apply(class, 2, quantile, probs = c((.5 * (1 - ci)), 1 - (.5 * (1 - ci))))
+      }))
+      if (to_center) {
+        ses <- ses - rep(colMeans(x$data, na.rm = TRUE), each = 2)
+      }
+      if (to_scale) {
+        ses <- ses / rep(apply(x$data, 2, sd, na.rm = TRUE), each = 2)
+      }
+      names(ses) <- paste0("se.", 1:n_classes)
+      ses$Variable <- unlist(lapply(colnames(x$data), rep, 2))
+      ses$boundary <- "lower"
+      ses$boundary[seq(2, nrow(ses), by = 2)] <- "upper"
+      ses <-
+        reshape(
+          ses,
+          direction = "long",
+          varying = 1:n_classes,
+          timevar = "Class"
+        )
+      ses <-
+        reshape(
+          ses,
+          direction = "wide",
+          idvar = c("Variable", "Class"),
+          timevar = "boundary"
+        )
+      ses$Variable <- ordered(ses$Variable, levels = colnames(x$data))
+      classplot <-
+        classplot + geom_errorbar(
+          data = ses,
+          aes_string(
+            x = "Class",
+            colour = "Variable",
+            ymin = "se.lower",
+            ymax = "se.upper"
+          ),
+          position = position_dodge(width = .75),
+          width = .4
+        )
+    }
+    classplot + theme_bw() +
+      geom_vline(xintercept = seq(1.5, (n_classes - 1) + .5, 1), linetype = 2) +
+      scale_x_discrete(expand = c(0, 0))
   }
 }
-
