@@ -1,13 +1,13 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![Build Status](https://travis-ci.org/jrosen48/tidyLPA.svg?branch=master)](https://travis-ci.org/jrosen48/tidyLPA) <!-- [![CRAN status](https://www.r-pkg.org/badges/version/tidyLPA)](https://cran.r-project.org/package=tidyLPA) --> <!-- [![](https://cranlogs.r-pkg.org/badges/tidyLPA)](https://cran.r-project.org/package=tidyLPA) --> <!-- [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing) -->
+[![Build Status](https://travis-ci.org/jrosen48/tidyLPA.svg?branch=master)](https://travis-ci.org/jrosen48/tidyLPA) [![CRAN status](https://www.r-pkg.org/badges/version/tidyLPA)](https://cran.r-project.org/package=tidyLPA) [![](https://cranlogs.r-pkg.org/badges/tidyLPA)](https://cran.r-project.org/package=tidyLPA) [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing) [![status](http://joss.theoj.org/papers/ccb887b4991abca9517847b016cdb33d/status.svg)](http://joss.theoj.org/papers/ccb887b4991abca9517847b016cdb33d)
 
 Background
 ----------
 
 Latent Profile Analysis (LPA) is a statistical modeling approach for estimating distinct profiles, or groups, of variables. In the social sciences and in educational research, these profiles could represent, for example, how different youth experience dimensions of being engaged (i.e., cognitively, behaviorally, and affectively) at the same time.
 
-tidyLPA provides the functionality to carry out LPA in R. In particular, tidyLPA provides functionality to specify different models that determine whether and how different parameters (i.e., means, variances, and covariances) are estimated and to specify (and compare solutions for) the number of profiles to estimate.
+tidyLPA provides the functionality to carry out LPA in R. In particular, tidyLPA provides functionality to specify different models that determine whether and how different parameters (i.e., means, variances, and covariances) are estimated and to specify (and compare solutions for) the number of profiles to estimate. The package is designed and documented to be easy to use, especially for beginners to LPA, but with fine-grained options available for estimating models and evaluating specific output as part of more complex analyses.
 
 Installation
 ------------
@@ -28,7 +28,7 @@ devtools::install_github("jrosen48/tidyLPA")
 Example
 -------
 
-Here is a brief example using the built-in `pisaUSA15` dataset and variables for broad interest, enjoyment, and self-efficacy. Note that we first type the name of the data frame, followed by the unquoted names of the variables used to create the profiles. We also specify the number of profiles and the model. See `?estimate_profiles` for more details.
+Here is a brief example using the built-in `pisaUSA15` data set and variables for broad interest, enjoyment, and self-efficacy. Note that we first type the name of the data frame, followed by the unquoted names of the variables used to create the profiles. We also specify the number of profiles and the model. See `?estimate_profiles` for more details.
 
 ``` r
 library(tidyLPA)
@@ -40,7 +40,7 @@ d <- pisaUSA15[1:100, ]
 estimate_profiles(d, 
                   broad_interest, enjoyment, self_efficacy, 
                   n_profiles = 3)
-#> Fit NA model with 3 profiles.
+#> Fit Equal variances and covariances fixed to 0 (model 1) model with 3 profiles.
 #> LogLik is 283.991
 #> BIC is 631.589
 #> Entropy is 0.914
@@ -60,6 +60,8 @@ estimate_profiles(d,
 #> # ... with 84 more rows
 ```
 
+The version of this function that uses MPlus is simple `estimate_profiles_mplus()` that is called in the same way (though some particular details can be changed with arguments specific to either `estimate_profiles` or to `estimate_profiles_mplus()`).
+
 See the output is simply a data frame with the profile (and its posterior probability) and the variables used to create the profiles (this is the "tidy" part, in that the function takes and returns a data frame).
 
 We can plot the profiles with by *piping* (using the `%>%` operator, loaded from the `dplyr` package) the output to `plot_profiles()`.
@@ -71,10 +73,6 @@ estimate_profiles(d,
                   broad_interest, enjoyment, self_efficacy, 
                   n_profiles = 3) %>% 
     plot_profiles(to_center = TRUE)
-#> Fit NA model with 3 profiles.
-#> LogLik is 283.991
-#> BIC is 631.589
-#> Entropy is 0.914
 ```
 
 ![](man/figures/README-unnamed-chunk-5-1.png)
@@ -109,6 +107,17 @@ estimate_profiles(d,
                   covariances = "varying",
                   n_profiles = 3)
 ```
+
+Comparing a wide range of solutions
+-----------------------------------
+
+The function `compare_solutions()` estimates models with varying numbers of profiles and model specifications:
+
+``` r
+compare_solutions(d, broad_interest, enjoyment, self_efficacy)
+```
+
+The version that uses MPlus - `compare_solutions_mplus()` - is called in the same way; like for `estimate_profiles()` and `estimate_profiles_mplus()`, some particular details can be specified with arguments specific to `compare_solutions()` or `compare_solutions_mplus()`.
 
 More information
 ----------------
