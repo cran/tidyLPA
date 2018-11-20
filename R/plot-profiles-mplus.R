@@ -5,9 +5,104 @@
 #' @param mplus_out_name character string; name of the mplus out file that is read if the posterior probabilities are plotted; defaults to i.out (which is the default name for the file created by other tidyLPA functions)
 #' @param standard_error_interval number between 0 and 1; defaults to .95
 #' @inheritParams plot_profiles
+#' @examples
+#' \dontrun{
+#'
+#' m <- estimate_profiles_mplus(iris,
+#' Sepal.Length, Sepal.Width, Petal.Length, Petal.Width,
+#' n_profiles = 2)
+#'
+#' plot_profiles_mplus(m)
+#'
+#' m <- estimate_profiles_mplus(iris,
+#' Sepal.Length, Sepal.Width, Petal.Length, Petal.Width,
+#' n_profiles = 2, latent_vars = list(sepal = c(1, 2), petal = c(3, 4)),
+#' remove_tmp_files = FALSE)
+#'
+#' plot_profiles_mplus(mplus_out_name = "i.out")
+#' }
 #' @export
 
-plot_profiles_mplus <- function(mplus_data, to_center = TRUE, to_scale = TRUE, plot_post_probs = FALSE, mplus_out_name = "i.out", standard_error_interval = .95) {
+plot_profiles_mplus <- function(mplus_data = NULL,
+                                to_center = FALSE,
+                                to_scale = FALSE,
+                                plot_post_probs = FALSE,
+                                mplus_out_name = NULL,
+                                standard_error_interval = .95) {
+
+    if (!is.null(mplus_out_name)) {
+
+        m <- suppressWarnings(MplusAutomation::readModels(mplus_out_name)) # for model reading warnings
+
+        if (m$summaries$NContinuousLatentVars > 0) {
+
+            d <- m %>% purrr::pluck("parameters", "unstandardized")
+            d$param <- ifelse(nchar(d$param) > 8, str_sub(d$param, end = 8), d$param)
+
+            if (to_center == TRUE) {
+                the_means <-  m$sampstat$means %>%
+                    dplyr::as_data_frame() %>%
+                    tidyr::gather("key", "intercept_mean") %>%
+                    dplyr::rename(param = .data$key) %>%
+                    dplyr::mutate(paramHeader = "Intercepts")
+
+                d <- dplyr::left_join(d, the_means, by = c("paramHeader", "param"))
+                d$est <- ifelse(d$paramHeader == "Intercepts", d$est - d$intercept_mean, d$est)
+            }
+
+            overall_factor_loadings <- d %>%
+                dplyr::filter(str_detect(.data$paramHeader, ".BY")) %>%
+                dplyr::filter(.data$LatentClass == 1) %>%
+                dplyr::mutate(latent = stringr::str_sub(.data$paramHeader, end = -4)) %>%
+                dplyr::select(.data$latent, observed = .data$param, loading = .data$est, .data$se)
+
+            means_zero_scalar <- d %>%
+                dplyr::filter(str_detect(.data$paramHeader, "Means")) %>%
+                dplyr::filter(.data$est == 0.000) %>%
+                dplyr::summarize(lc_means_zero = mean(as.integer(.data$LatentClass))) %>%
+                dplyr::pull()
+
+            d_sub <- d %>%
+                dplyr::filter(.data$LatentClass == .data$means_zero_scalar)
+
+            one_class_indicators <- d_sub %>%
+                dplyr::filter(str_detect(.data$paramHeader, "Intercepts")) %>%
+                dplyr::rename(observed = .data$param, intercept = .data$est) %>%
+                dplyr::left_join(overall_factor_loadings, by = "observed") %>%
+                dplyr::mutate(value = .data$intercept * .data$loading) %>%
+                dplyr::select(.data$observed, .data$latent, .data$intercept, .data$loading, .data$value, .data$LatentClass)
+
+            one_class_raw_means <- one_class_indicators %>%
+                dplyr::group_by(.data$latent) %>%
+                dplyr::summarize(zero_mean_est = mean(.data$value))
+
+            to_plot <- d %>%
+                dplyr::filter(.data$LatentClass != "Categorical.Latent.Variables") %>%
+                dplyr::filter(.data$paramHeader == "Means") %>%
+                dplyr::filter(.data$param != "C#1") %>%
+                dplyr::select(latent = .data$param, .data$est, intercept_se = .data$se, .data$LatentClass) %>%
+                dplyr::left_join(one_class_raw_means, by = "latent") %>%
+                dplyr::mutate(adjusted_est = .data$est + .data$zero_mean_est) %>%
+                dplyr::select(.data$latent, est = .data$adjusted_est, class = .data$LatentClass)
+
+            p <- ggplot2::ggplot(to_plot, ggplot2::aes(x = .data$class,
+                                                       y = .data$est,
+                                                       fill = .data$latent,
+                                                       group = .data$latent)) +
+                 ggplot2::geom_col(position = "dodge") +
+                 ggplot2::theme_bw() +
+                 ggplot2::scale_x_discrete(NULL) +
+                 ggplot2::scale_fill_discrete(NULL) +
+                 ggplot2::ylab("Estimate (raw score)")
+
+            if (to_center == TRUE) {
+                p + ylab("Centered values")
+            }
+
+            return(p)
+
+        }
+    }
 
     if (plot_post_probs == TRUE) {
 
@@ -24,7 +119,7 @@ plot_profiles_mplus <- function(mplus_data, to_center = TRUE, to_scale = TRUE, p
                        ymin = .data$class_mean - (1.96 * ((.data$class_sd / sqrt(number_of_rows)))),
                        ymax = .data$class_mean + (1.96 * ((.data$class_sd / sqrt(number_of_rows)))),
                        fill = .data$var
-                       )) +
+            )) +
             geom_col(position = "dodge") +
             geom_errorbar(position = "dodge") +
             theme_bw() +
