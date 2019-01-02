@@ -2,7 +2,7 @@ Type: Package
 Package: tidyLPA
 Title: Easily Carry Out Latent Profile Analysis (LPA) Using Open-Source
         or Commercial Software
-Version: 0.2.3
+Version: 0.2.4
 Authors@R: c(
     person(c("Joshua", "M"), "Rosenberg", role = c("aut", "cre"), email = "jmichaelrosenberg@gmail.com"),
     person(c("Jennifer", "A"), "Schmidt", role = "ctb", email = "jaschmid@msu.edu"),
@@ -27,9 +27,9 @@ Suggests: covr, devtools, knitr, MplusAutomation, parallel, rmarkdown,
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 NeedsCompilation: no
-Packaged: 2018-11-20 21:26:41 UTC; joshuarosenberg
+Packaged: 2019-01-02 14:01:27 UTC; joshuarosenberg
 Author: Joshua M Rosenberg [aut, cre],
   Jennifer A Schmidt [ctb],
   Patrick N Beymer [ctb],
@@ -38,4 +38,4 @@ Author: Joshua M Rosenberg [aut, cre],
   Matthew J. Schell [ctb]
 Maintainer: Joshua M Rosenberg <jmichaelrosenberg@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-11-20 21:50:03 UTC
+Date/Publication: 2019-01-02 14:30:03 UTC
