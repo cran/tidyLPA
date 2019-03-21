@@ -1,29 +1,71 @@
-context("test-create_profiles_mplus-r.R")
+context("test-estimate_profiles-mplus.R")
 
-test_that("estimate_profiles_mplus() works", {
-  skip_on_cran()
-  skip_on_travis()
-  x <- estimate_profiles_mplus(iris, Sepal.Length, Sepal.Width, Petal.Length, Petal.Width, n_profiles = 3)
-  y <- dplyr::count(x, C)
-  expect_equal(dplyr::pull(y)[1], 50)
-  expect_equal(dplyr::pull(y)[2], 55)
-  expect_equal(dplyr::pull(y)[3], 45)
+test_that("estimate_profiles_mplus handles single-column data", {
+    skip_on_cran()
+    skip_on_travis()
+    m_cars_mplus <- estimate_profiles(mtcars[, "mpg"],
+                                      n_profiles = 2,
+                                      models = 2,
+                                      package = "MplusAutomation")
+    expect_equal(m_cars_mplus$model_2_class_2$estimates$Estimate, c(18.481, 18.337, 31.759, 2.429), tolerance = .05)
+})
 
-  # y <- as.data.frame(suppressWarnings(x$parameters$unstandardized[x$parameters$unstandardized$paramHeader == "Means", ]))
-  #
-  # expect_equal(y[1, 3], 5.01, tolerance = .01)
-  # expect_equal(y[5, 3], 5.92, tolerance = .01)
-  # expect_equal(y[9, 3], 6.68, tolerance = .01)
-  #
-  # expect_equal(y[2, 3], 3.43, tolerance = .01)
-  # expect_equal(y[6, 3], 2.75, tolerance = .01)
-  # expect_equal(y[10, 3], 3.02, tolerance = .01)
-  #
-  # expect_equal(y[3, 3], 1.46, tolerance = .01)
-  # expect_equal(y[7, 3], 4.32, tolerance = .01)
-  # expect_equal(y[11, 3], 5.62, tolerance = .01)
-  #
-  # expect_equal(y[4, 3], 0.24, tolerance = .01)
-  # expect_equal(y[8, 3], 1.35, tolerance = .01)
-  # expect_equal(y[12, 3], 2.07, tolerance = .01)
+test_that("single column fit indices are the same across mplus and mclust", {
+    skip_on_cran()
+    skip_on_travis()
+    m_cars_mplus <- estimate_profiles(mtcars[, "mpg"], n_profiles = 2, models = 2, package = "MplusAutomation")
+    m_cars_mclust <- estimate_profiles(mtcars[, "mpg"], n_profiles = 2, models = 2)
+    expect_equal(m_cars_mclust$model_2_class_2$fit[-length(m_cars_mclust$model_2_class_2$fit)],
+                 m_cars_mplus$model_2_class_2$fit[-length(m_cars_mplus$model_2_class_2$fit)], tolerance = .05)
+})
+
+test_that("estimate_profiles() yields the same estimates for mclust and Mplus", {
+    skip_on_cran()
+    skip_on_travis()
+    m_mplus <- estimate_profiles(iris[, 1:4], n_profiles = 3,  models = c(1:3,6), package = "MplusAutomation")
+    m_mclust <- estimate_profiles(iris[, 1:4], n_profiles = 3,  models = c(1:3,6))
+    expect_equal(m_mclust[[1]]$estimates$Estimate, m_mplus[[1]]$estimates$Estimate, tolerance = .01)
+})
+
+test_that("estimate_profiles() yields the same LogLikelihoods for mclust and Mplus", {
+    skip_on_cran()
+    skip_on_travis()
+    m_mplus <- estimate_profiles(iris[, 1:4], n_profiles = 3,  models = c(1:3,6), package = "MplusAutomation")
+    m_mclust <- estimate_profiles(iris[, 1:4], n_profiles = 3,  models = c(1:3,6))
+    expect_equal(round(sapply(m_mclust, function(x){x$fit["LogLik"]})),
+                 round(sapply(m_mplus, function(x){x$fit["LogLik"]})),
+                 tolerance = .01)
+})
+
+test_that("LogLik values are as expected for model type 1", {
+    skip_on_cran()
+    skip_on_travis()
+    m_mplus <- estimate_profiles(iris[, 1:4], n_profiles = 3,
+                                 models = c(1:3,6), package = "MplusAutomation")
+    expect_equal(m_mplus$model_1_class_3$model$summaries$LL, -361.4295,
+                 tolerance = .001)
+})
+
+test_that("LogLik values are as expected for model type 2", {
+    skip_on_cran()
+    skip_on_travis()
+    m_mplus <- estimate_profiles(iris[, 1:4], n_profiles = 3,  models = c(1:3,6), package = "MplusAutomation")
+    expect_equal(m_mplus$model_2_class_3$model$summaries$LL, -307.1808,
+                 tolerance = .001)
+})
+
+test_that("LogLik values are as expected for model type 3", {
+    skip_on_cran()
+    skip_on_travis()
+    m_mplus <- estimate_profiles(iris[, 1:4], n_profiles = 3,  models = c(1:3,6), package = "MplusAutomation")
+    expect_equal(m_mplus$model_3_class_3$model$summaries$LL, -256.3547,
+                 tolerance = .001)
+})
+
+test_that("LogLik values are as expected for model type 6", {
+    skip_on_cran()
+    skip_on_travis()
+    m_mplus <- estimate_profiles(iris[, 1:4], n_profiles = 3,  models = c(1:3,6), package = "MplusAutomation")
+    expect_equal(m_mplus$model_6_class_3$model$summaries$LL, -180.1858,
+                 tolerance = .001)
 })

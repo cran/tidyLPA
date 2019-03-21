@@ -2,49 +2,79 @@
 % Please edit documentation in R/plot-profiles.R
 \name{plot_profiles}
 \alias{plot_profiles}
-\title{Plot variable means and variances by profile}
+\alias{plot_profiles.default}
+\alias{plot_profiles.tidyLPA}
+\title{Create latent profile plots}
 \usage{
-plot_profiles(x, to_center = FALSE, to_scale = FALSE,
-  plot_what = "tibble", plot_error_bars = TRUE, plot_rawdata = TRUE,
-  ci = 0.95)
+plot_profiles(x, variables = NULL, ci = 0.95, sd = TRUE,
+  add_line = TRUE, rawdata = TRUE, bw = FALSE, alpha_range = c(0,
+  0.1), ...)
+
+\method{plot_profiles}{default}(x, variables = NULL, ci = 0.95,
+  sd = TRUE, add_line = TRUE, rawdata = TRUE, bw = FALSE,
+  alpha_range = c(0, 0.1), ...)
+
+\method{plot_profiles}{tidyLPA}(x, variables = NULL, ci = 0.95,
+  sd = TRUE, add_line = TRUE, rawdata = TRUE, bw = FALSE,
+  alpha_range = c(0, 0.1), ...)
 }
 \arguments{
-\item{x}{output from estimate_profiles()}
+\item{x}{An object containing the results of a mixture model analysis.}
 
-\item{to_center}{whether to center the data before plotting}
+\item{variables}{A character vectors with the names of the variables to be
+plotted (optional).}
 
-\item{to_scale}{whether to scale the data before plotting}
+\item{ci}{Numeric. What confidence interval should the errorbars span?
+Defaults to a 95\% confidence interval. Set to NULL to remove errorbars.}
 
-\item{plot_what}{whether to plot tibble or mclust output from estimate_profiles(); defaults to tibble}
+\item{sd}{Logical. Whether to display a box encompassing +/- 1SD Defaults to
+TRUE.}
 
-\item{plot_error_bars}{whether to plot error bars (representing the 95 percent confidence interval for the mean of each variable)}
+\item{add_line}{Logical. Whether to display a line, connecting cluster centroids
+belonging to the same latent class. Defaults to TRUE. Note that the
+information conveyed by such a line is limited.}
 
-\item{plot_rawdata}{whether to plot raw data; defaults to TRUE}
+\item{rawdata}{Should raw data be plotted in the background? Setting this to
+TRUE might result in long plotting times.}
 
-\item{ci}{confidence interval to plot (defaults to 0.95)}
+\item{bw}{Logical. Should the plot be black and white (for print), or color?}
+
+\item{alpha_range}{The minimum and maximum values of alpha (transparancy) for
+the raw data. Minimum should be 0; lower maximum values of alpha can help
+reduce overplotting.}
+
+\item{...}{Arguments passed to and from other functions.}
+}
+\value{
+An object of class 'ggplot'.
 }
 \description{
-Plot variable means and variances by profile
+Creates a profile plot according to best practices, focusing on the
+visualization of classification uncertainty by showing:
+\enumerate{
+\item Bars reflecting a confidence interval for the class centroids
+\item Boxes reflecting the standard deviations within each class; a box
+encompasses +/- 64\% of the observations in a normal distribution
+\item Raw data, whose transparancy is weighted by the posterior class
+probability, such that each datapoint is most clearly visible for the class
+it is most likely to be a member of.
 }
-\details{
-Plot the variable means and variances for data frame output from estimate_profiles()
-
-Plot the variable means and variances for data frame output from estimate_profiles().
-When plot_what is set to 'mclust', the errorbars represent non-parametric
-confidence intervals, obtained using bootstrapping (100 samples). Note that
-100 samples might be adequate for plotting, but is low for inference. If the
-number of participants per class is highly unbalanced, then weighted likelihood
-bootstrapping is used to ensure that each case is represented in the bootstrap
-samples (see O'Hagan, Murphy, Scrucca, and Gormley, 2015).
 }
 \examples{
-m3 <- estimate_profiles(iris,
-    Sepal.Length, Sepal.Width, Petal.Length, Petal.Width,
-    n_profiles = 3)
-plot_profiles(m3)
+# Example 1
 
-m3 <- estimate_profiles(iris,
-    Sepal.Length, Sepal.Width, Petal.Length, Petal.Width,
-    n_profiles = 3, to_return = "mclust")
-plot_profiles(m3, plot_what = "mclust")
+# Example 2
+
+\donttest{
+mtcars \%>\%
+  subset(select = c("wt", "qsec", "drat")) \%>\%
+  poms \%>\%
+  estimate_profiles(1:4) \%>\%
+  plot_profiles(add_line = F)
 }
+}
+\author{
+Caspar J. van Lissa
+}
+\keyword{mixture}
+\keyword{plot}

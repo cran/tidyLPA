@@ -1,115 +1,83 @@
 ## ---- echo = FALSE-------------------------------------------------------
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+collapse = TRUE,
+comment = "#>"
 )
 
-## ---- eval = F-----------------------------------------------------------
+## ---- eval = FALSE-------------------------------------------------------
 #  install.packages("tidyLPA")
 
-## ----gh-installation, eval = FALSE---------------------------------------
+## ---- gh-installation, eval = FALSE--------------------------------------
 #  install.packages("devtools")
-#  devtools::install_github("jrosen48/tidyLPA")
+#  devtools::install_github("data-edu/tidyLPA")
 
-## ------------------------------------------------------------------------
+## ---- message = F--------------------------------------------------------
 library(tidyLPA)
-d <- pisaUSA15[1:100, ]
-
-## ---- warning = F, message = F-------------------------------------------
-compare_solutions(d, broad_interest, enjoyment, self_efficacy)
+library(dplyr)
 
 ## ------------------------------------------------------------------------
-m3 <- estimate_profiles(d, 
-                        broad_interest, enjoyment, self_efficacy,
-                        n_profiles = 4)
+pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    single_imputation() %>%
+    estimate_profiles(3)
 
-## ------------------------------------------------------------------------
-plot_profiles(m3)
+## ---- eval = FALSE-------------------------------------------------------
+#  pisaUSA15[1:100, ] %>%
+#      select(broad_interest, enjoyment, self_efficacy) %>%
+#      single_imputation() %>%
+#      estimate_profiles(3, package = "MplusAutomation")
 
-## ------------------------------------------------------------------------
-plot_profiles(m3, to_center = TRUE, to_scale = TRUE)
+## ---- eval = TRUE--------------------------------------------------------
+pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    single_imputation() %>%
+    scale() %>%
+    estimate_profiles(3) %>% 
+    plot_profiles()
 
-## ------------------------------------------------------------------------
-library(dplyr, warn.conflicts = FALSE)
+## ---- eval = TRUE--------------------------------------------------------
+pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    single_imputation() %>%
+    scale() %>%
+    estimate_profiles(n_profiles = 2:4) %>% 
+    plot_profiles()
 
-estimate_profiles(d, 
-                  broad_interest, enjoyment, self_efficacy, 
-                  n_profiles = 3) %>% 
-    plot_profiles(to_center = TRUE)
+## ---- eval = TRUE--------------------------------------------------------
+pisaUSA15[1:100, ] %>%
+    single_imputation() %>%
+    estimate_profiles(1:3, 
+                      variances = c("equal", "varying"),
+                      covariances = c("zero", "varying")) %>% 
+    compare_solutions(statistics = c("AIC", "BIC"))
 
-## ------------------------------------------------------------------------
-m3 <- estimate_profiles(d, 
-                        broad_interest, enjoyment, self_efficacy, 
-                        n_profiles = 3, to_return = "mclust")
+## ---- eval = TRUE--------------------------------------------------------
+pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    estimate_profiles(3, 
+                      variances = "varying",
+                      covariances = "varying")
 
-plot_profiles(m3, plot_what = "mclust")
+## ---- eval = TRUE--------------------------------------------------------
+m3 <- pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    estimate_profiles(3)
 
-## ------------------------------------------------------------------------
-estimate_profiles(d, 
-                  broad_interest, enjoyment, self_efficacy, 
-                  variances = "varying",
-                  covariances = "varying",
-                  n_profiles = 3)
+get_estimates(m3)
 
-## ------------------------------------------------------------------------
-estimate_profiles(d,
-                  broad_interest, enjoyment, self_efficacy,
-                  n_profiles = 4)
+## ---- eval = TRUE--------------------------------------------------------
+pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    scale() %>%
+    estimate_profiles(4) %>%
+    plot_profiles()
 
-## ------------------------------------------------------------------------
-attributes(m3)$mclust_output$parameters
+pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    poms() %>%
+    estimate_profiles(4) %>%
+    plot_profiles()
 
-## ------------------------------------------------------------------------
-m3_mclust <- estimate_profiles(d, 
-                               broad_interest, enjoyment, self_efficacy, 
-                               n_profiles = 4, 
-                               to_return = "mclust")
-
-## ------------------------------------------------------------------------
-m3_mclust$parameters
-
-## ------------------------------------------------------------------------
-m3_processed_raw <- estimate_profiles(d, 
-                                      broad_interest, enjoyment, self_efficacy, 
-                                      n_profiles = 4, 
-                                      center_raw_data = TRUE, 
-                                      scale_raw_data = TRUE)
-
-## ------------------------------------------------------------------------
-estimate_profiles(d, 
-                  broad_interest, enjoyment,
-                  n_profiles = 4, 
-                  return_orig_df = TRUE)
-
-## ---- eval = F-----------------------------------------------------------
-#  compare_solutions_mplus(d, broad_interest, enjoyment, self_efficacy)
-
-## ---- eval = F-----------------------------------------------------------
-#  compare_solutions_mplus(d, broad_interest, enjoyment, self_efficacy,
-#                          return_stats_df = TRUE)
-
-## ------------------------------------------------------------------------
-if (require('parallel')) {
-  parallel::detectCores()
-}
-
-## ---- eval = F-----------------------------------------------------------
-#  compare_solutions_mplus(d, broad_interest, enjoyment, self_efficacy, n_processors = 4)
-
-## ---- eval = F-----------------------------------------------------------
-#  m1 <- estimate_profiles_mplus(d,
-#                                broad_interest, enjoyment, self_efficacy,
-#                                n_profiles = 3)
-
-## ---- eval = F-----------------------------------------------------------
-#  plot_profiles_mplus(m1, to_center = TRUE, to_scale = TRUE)
-
-## ---- eval = F-----------------------------------------------------------
-#  bootstrap_lrt(d, broad_interest, enjoyment, self_efficacy)
-
-## ---- eval = F-----------------------------------------------------------
-#  estimate_profiles(d,
-#                    broad_interest, enjoyment, self_efficacy,
-#                    n_profiles = 4,
-#                    prior_control = TRUE)
+## ---- eval = TRUE--------------------------------------------------------
+get_data(m3)
 
