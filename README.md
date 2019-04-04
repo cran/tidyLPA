@@ -5,7 +5,7 @@
 Note
 ----
 
-tidyLPA has undergone some major changes. You can read about them here [here](https://data-edu.github.io/tidyLPA/articles/introduction-to-major-changes.html).
+tidyLPA has undergone some major changes. You can read about them [here](https://data-edu.github.io/tidyLPA/articles/introduction-to-major-changes.html).
 
 Background
 ----------
@@ -41,7 +41,7 @@ In these examples, we pass the results of one function to the next by *piping* (
 
 ``` r
 library(tidyLPA)
-library(tidyverse)
+library(dplyr)
 ```
 
 ``` r
@@ -54,9 +54,9 @@ pisaUSA15[1:100, ] %>%
 #> tidyLPA analysis using mclust: 
 #> 
 #>  Model Classes AIC     BIC     Entropy prob_min prob_max n_min n_max
-#>  1     3       637.635 674.107 0.755   0.000    0.987    0.040 0.600
+#>  1     3       645.835 682.307 0.807   0.000    0.991    0.030 0.680
 #>  BLRT_p
-#>  0.030
+#>  0.010
 ```
 
 ### Mplus
@@ -71,7 +71,7 @@ pisaUSA15[1:100, ] %>%
 #> tidyLPA analysis using mplus: 
 #> 
 #>  Model Classes AIC     BIC     Entropy prob_min prob_max n_min n_max
-#>  1     3       638.390 674.862 0.792   0.823    0.950    0.030 0.650
+#>  1     3       632.488 668.960 0.788   0.814    0.954    0.030 0.670
 #>  BLRT_p
 #>  0.013
 ```
@@ -177,4 +177,4 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 Acknowledgments
 ---------------
 
-This material is based upon work supported by the National Science Foundation under Grant No: DRL\#1661064. Any opinions, findings, conclusions, or recommendations expressed in this material are those of the authors and do not reflect the views of the National Science Foundation.
+This material is based upon work supported by the National Science Foundation under *Grant No.: DRL\#1661064*. Any opinions, findings, conclusions, or recommendations expressed in this material are those of the authors and do not reflect the views of the National Science Foundation.

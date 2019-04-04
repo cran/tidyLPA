@@ -43,13 +43,13 @@ pisaUSA15[1:100, ] %>%
     estimate_profiles(n_profiles = 2:4) %>% 
     plot_profiles()
 
-## ---- eval = TRUE--------------------------------------------------------
-pisaUSA15[1:100, ] %>%
-    single_imputation() %>%
-    estimate_profiles(1:3, 
-                      variances = c("equal", "varying"),
-                      covariances = c("zero", "varying")) %>% 
-    compare_solutions(statistics = c("AIC", "BIC"))
+## ---- eval = FALSE-------------------------------------------------------
+#  pisaUSA15[1:100, ] %>%
+#      single_imputation() %>%
+#      estimate_profiles(1:3,
+#                        variances = c("equal", "varying"),
+#                        covariances = c("zero", "varying")) %>%
+#      compare_solutions(statistics = c("AIC", "BIC"))
 
 ## ---- eval = TRUE--------------------------------------------------------
 pisaUSA15[1:100, ] %>%
