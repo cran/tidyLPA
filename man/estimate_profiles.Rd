@@ -5,7 +5,7 @@
 \title{Estimate latent profiles}
 \usage{
 estimate_profiles(df, n_profiles, models = NULL, variances = "equal",
-  covariances = "zero", package = "mclust", ...)
+  covariances = "zero", package = "mclust", select_vars = NULL, ...)
 }
 \arguments{
 \item{df}{data.frame of numeric data; continuous indicators are required for
@@ -32,6 +32,10 @@ profiles), and "varying" (free covariances across profiles).}
 \item{package}{Character. Which package to use; 'mclust' or
 'MplusAutomation' (requires Mplus to be installed). Default: 'mclust'.}
 
+\item{select_vars}{Character. Optional vector of variable names in \code{df},
+to be used for model estimation. Defaults to \code{NULL}, which means all
+variables in \code{df} are used.}
+
 \item{...}{Additional arguments are passed to the estimating function; i.e.,
 \code{\link[mclust]{Mclust}}, or \code{\link[MplusAutomation]{mplusModeler}}.}
 }
@@ -51,8 +55,8 @@ most common requirements. These are:
 \item Equal variances and covariances fixed to 0
 \item Varying variances and covariances fixed to 0
 \item Equal variances and equal covariances
-\item Varying variances and equal covariances
-\item Equal variances and varying covariances
+\item Varying variances and equal covariances (not able to be fit w/ mclust)
+\item Equal variances and varying covariances (not able to be fit w/ mclust)
 \item Varying variances and varying covariances
 }
 
@@ -80,7 +84,7 @@ iris \%>\%
   estimate_profiles(n_profiles = 1:4, models = 1:3)
 
 # Example 3:
-iris_subset \%>\%
+iris_sample \%>\%
   subset(select = c("Sepal.Length", "Sepal.Width",
     "Petal.Length")) \%>\%
   estimate_profiles(n_profiles = 1:4, variances = c("equal", "varying"),
