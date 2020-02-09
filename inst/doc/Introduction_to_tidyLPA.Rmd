@@ -57,7 +57,7 @@ Other tools in R allow for estimating Gaussian mixture models, or models of mult
 
 In addition to following the same general approach, using tools that are designed for Gaussian mixture modeling have other benefits, some efficiency-related (see [RMixMod](https://cran.r-project.org/package=Rmixmod), which uses compiled C++ code) and others in terms of ease-of-use (i.e., the plot methods built-in to RMixMod, mclust, and other tools). However, they also have some drawbacks, in that it can be difficult to translate between the model specifications, which are often described in terms of the geometric properties of the multivariate distributions being estimated (i.e., "spherical, equal volume"), rather than in terms of whether and how the means, variances, and covariances are estimated. They also may use different default settings (than those encountered in MPlus) in terms of the expectation-maximization algorithm, which can make comparing results across tools challenging.
 
-This package focuses on models that are commonly specified as part of LPA. Because MPlus is so widely-used, it can be helpful to compare output from other software to MPlus. The functions in tidyLPA that use mclust have been benchmarked to MPlus for a series of simple models (with small datasets and for models with small numbers of profiles. This [R Markdown output](https://jrosen48.github.io/r-markdown/comparing-mplus-mclust.html) contains information on how mclust and Mplus compare. The R Markdown to generate the output is also available [here](https://jrosen48.github.io/r-markdown/comparing-mplus-mclust.Rmd), and, as long as you have purchased MPlus (and installed MplusAutomation), can be used to replicate all of the results for the benchmark. Note that most of the output is identical, though there are some differences in the hundreths decimal places for some. Because of differences in settings for the EM algorithm and particularly for the start values (random starts for MPlus and starting values from hierarchical clustering for mclust), differences may be expected for more complex data and models. An important direction for the development of tidyLPA (the functions that use mclust) is to continue to understand when and why the output differs from MPlus output. Note that tidyLPA also provides functions to interface to MPlus, though these are not the focus of the package, as they require MPlus to be purchased and installed in order to be used. 
+This package focuses on models that are commonly specified as part of LPA. Because MPlus is so widely-used, it can be helpful to compare output from other software to MPlus. The functions in tidyLPA that use mclust have been benchmarked to MPlus for a series of simple models (with small datasets and for models with small numbers of profiles. This [R Markdown output](https://data-edu.github.io/tidyLPA/articles/benchmarking-mclust-and-mplus.html) contains information on how mclust and Mplus compare. Note that most of the output is identical, though there are some differences in the hundredths decimal places for some. Because of differences in settings for the EM algorithm and particularly for the start values (random starts for MPlus and starting values from hierarchical clustering for mclust), differences may be expected for more complex data and models. An important direction for the development of tidyLPA (the functions that use mclust) is to continue to understand when and why the output differs from MPlus output. Note that tidyLPA also provides functions to interface to MPlus, though these are not the focus of the package, as they require MPlus to be purchased and installed in order to be used. 
 
 # Example
 
@@ -84,7 +84,7 @@ In these examples, we pass the results of one function to the next by *piping* (
 
 ```{r, message = F}
 library(tidyLPA)
-library(tidyverse)
+library(dplyr)
 ```
 
 ```{r}
@@ -134,6 +134,31 @@ pisaUSA15[1:100, ] %>%
     compare_solutions(statistics = c("AIC", "BIC"))
 ```
 
+## Passing additional arguments
+
+Additional arguments can be passed as follows.
+
+For MPlus (here, the additional argument is `ANALYSIS`; see:
+
+```{r, eval = FALSE}
+pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    single_imputation() %>% 
+    estimate_profiles(3, 
+                      package = "mplus", 
+                      ANALYSIS = "starts = 100, 20;")
+```
+
+For mclust (here, the additional argument is to `prior`; see `?mclust::mclust` for other options):
+
+```{r, eval = FALSE}
+pisaUSA15[1:100, ] %>%
+    select(broad_interest, enjoyment, self_efficacy) %>%
+    single_imputation() %>% 
+    estimate_profiles(3,
+                      prior = priorControl())
+```
+
 # More information on model specifications
 
 ## Model specification
@@ -142,7 +167,7 @@ In addition to the number of profiles (specified with the `n_profiles` argument)
 
 The models are specified by passing arguments to the `variance` and `covariance` arguments. The possible values for these arguments are:
 
-- `variances`: "equal" and "zero"
+- `variances`: "equal" and "varying"
 - `covariances`: "varying", "equal", and "zero"
 
 If no values are specified for these, then the variances are constrained to be equal across classes, and covariances are fixed to 0 (conditional independence of the indicators).
@@ -232,7 +257,7 @@ $$
 \left[ \begin{matrix} { \sigma  }_{ 1 }^{ 2 } & { \sigma  }_{ 21p } & { \sigma  }_{ 31p } & { \sigma  }_{ 41p } \\ { \sigma  }_{ 12p } & { \sigma  }_{ 2 }^{ 2 } & { \sigma  }_{ 23p } & { \sigma  }_{ 24p } \\ { \sigma  }_{ 13p } & { \sigma  }_{ 12p } & { \sigma  }_{ 3 }^{ 2 } & { \sigma  }_{ 33p } \\ { \sigma  }_{ 14p } & { \sigma  }_{ 12p } & { \sigma  }_{ 12p } & { \sigma  }_{ 4 }^{ 2 } \end{matrix} \right] \quad 
 $$
 
-### 6. Varying variances and varying covariances (model 4)
+### 6. Varying variances and varying covariances (model 6)
 
 This model corresponds to the mclust model "VVV". It allows the variances and the covariances to be freely estimated across profiles. 
 
@@ -310,7 +335,7 @@ Descriptions of these fit indices follows:
 * CAIC: Consistent Aikake information criterion; based on -2 log-likelihood, and penalized by number of parameters adjusted by sample size.  
 * CLC: Classification Likelihood Criterion; based on -2 log-likelihood, and penalized by the entropy (Biernacki, 1997).  
 * KIC: Kullback information criterion; based on -2 log-likelihood, and penalized by 3 times the number of parameters -1 (Cavanaugh, 1999).  
-* SABIC: Sample size-adjusted bayesian information criterion (Sclove, 1987).  
+* SABIC: Sample size-adjusted Bayesian information criterion (Sclove, 1987).  
 * ICL: Integrated completed likelihood (Biernacki, Celeux, & Govaert, 2000).  
 * Entropy: A measure of classification uncertainty, reverse-coded so that 1 reflects complete certainty of classification, and 0 complete uncertainty (see Celeux & Soromenho, 1996).  
 * Prob. Min.: Minimum of the diagonal of the average latent class probabilities for most likely class membership, by assigned class. The minimum should be as high as possible, reflecting greater classification certainty (cases are assigned to classes they have a high probability of belonging to; see Jung & Wickrama, 2008).  
@@ -338,7 +363,7 @@ Pastor, D. A., Barron, K. E., Miller, B. J., & Davis, S. L. (2007). A latent pro
 
 **How to cite tidyLPA**
 
-> Rosenberg, J. M., Beymer, P. N., Anderson, D. J., & Schmidt, J. A. (2018). tidyLPA: An R Package to Easily Carry Out Latent Profile Analysis (LPA) Using Open-Source or Commercial Software. *Journal of Open Source Software, 3*(30), 978, https://doi.org/10.21105/joss.00978
+> Rosenberg, J. M., Beymer, P. N., Anderson, D. J., Van Lissa, C. J., & Schmidt, J. A. (2018). tidyLPA: An R Package to Easily Carry Out Latent Profile Analysis (LPA) Using Open-Source or Commercial Software. *Journal of Open Source Software, 3*(30), 978, https://doi.org/10.21105/joss.00978
 
 You can also cite the most latest version with the following citation:
 

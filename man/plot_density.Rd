@@ -4,14 +4,20 @@
 \alias{plot_density}
 \title{Create density plots for mixture models}
 \usage{
-plot_density(x, variables = NULL, bw = FALSE, conditional = FALSE,
-  alpha = 0.2, facet_labels = NULL)
+plot_density(
+  x,
+  variables = NULL,
+  bw = FALSE,
+  conditional = FALSE,
+  alpha = 0.2,
+  facet_labels = NULL
+)
 }
 \arguments{
 \item{x}{Object to plot.}
 
 \item{variables}{Which variables to plot. If NULL, plots all variables that
-are present in all Mplus models.}
+are present in all models.}
 
 \item{bw}{Logical. Whether to make a black and white plot (for print) or a
 color plot. Defaults to FALSE, because these density plots are hard to read

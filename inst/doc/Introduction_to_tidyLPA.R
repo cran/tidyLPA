@@ -1,33 +1,33 @@
-## ---- echo = FALSE-------------------------------------------------------
+## ---- echo = FALSE------------------------------------------------------------
 knitr::opts_chunk$set(
 collapse = TRUE,
 comment = "#>"
 )
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval = FALSE------------------------------------------------------------
 #  install.packages("tidyLPA")
 
-## ----gh-installation, eval = FALSE---------------------------------------
+## ----gh-installation, eval = FALSE--------------------------------------------
 #  install.packages("devtools")
 #  devtools::install_github("data-edu/tidyLPA")
 
-## ---- message = F--------------------------------------------------------
+## ---- message = F-------------------------------------------------------------
 library(tidyLPA)
-library(tidyverse)
+library(dplyr)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 pisaUSA15[1:100, ] %>%
     select(broad_interest, enjoyment, self_efficacy) %>%
     single_imputation() %>%
     estimate_profiles(3)
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval = FALSE------------------------------------------------------------
 #  pisaUSA15[1:100, ] %>%
 #      select(broad_interest, enjoyment, self_efficacy) %>%
 #      single_imputation() %>%
 #      estimate_profiles(3, package = "MplusAutomation")
 
-## ---- eval = TRUE--------------------------------------------------------
+## ---- eval = TRUE-------------------------------------------------------------
 pisaUSA15[1:100, ] %>%
     select(broad_interest, enjoyment, self_efficacy) %>%
     single_imputation() %>%
@@ -35,7 +35,7 @@ pisaUSA15[1:100, ] %>%
     estimate_profiles(3) %>% 
     plot_profiles()
 
-## ---- eval = TRUE--------------------------------------------------------
+## ---- eval = TRUE-------------------------------------------------------------
 pisaUSA15[1:100, ] %>%
     select(broad_interest, enjoyment, self_efficacy) %>%
     single_imputation() %>%
@@ -44,21 +44,36 @@ pisaUSA15[1:100, ] %>%
                       covariances = c("zero", "varying")) %>%
     compare_solutions(statistics = c("AIC", "BIC"))
 
-## ---- eval = TRUE--------------------------------------------------------
+## ---- eval = FALSE------------------------------------------------------------
+#  pisaUSA15[1:100, ] %>%
+#      select(broad_interest, enjoyment, self_efficacy) %>%
+#      single_imputation() %>%
+#      estimate_profiles(3,
+#                        package = "mplus",
+#                        ANALYSIS = "starts = 100, 20;")
+
+## ---- eval = FALSE------------------------------------------------------------
+#  pisaUSA15[1:100, ] %>%
+#      select(broad_interest, enjoyment, self_efficacy) %>%
+#      single_imputation() %>%
+#      estimate_profiles(3,
+#                        prior = priorControl())
+
+## ---- eval = TRUE-------------------------------------------------------------
 pisaUSA15[1:100, ] %>%
     select(broad_interest, enjoyment, self_efficacy) %>%
     estimate_profiles(3, 
                       variances = "varying",
                       covariances = "varying")
 
-## ---- eval = TRUE--------------------------------------------------------
+## ---- eval = TRUE-------------------------------------------------------------
 m3 <- pisaUSA15[1:100, ] %>%
     select(broad_interest, enjoyment, self_efficacy) %>%
     estimate_profiles(3)
 
 get_estimates(m3)
 
-## ---- eval = TRUE--------------------------------------------------------
+## ---- eval = TRUE-------------------------------------------------------------
 pisaUSA15[1:100, ] %>%
     select(broad_interest, enjoyment, self_efficacy) %>%
     scale() %>%
@@ -71,10 +86,10 @@ pisaUSA15[1:100, ] %>%
     estimate_profiles(4) %>%
     plot_profiles()
 
-## ---- eval = TRUE--------------------------------------------------------
+## ---- eval = TRUE-------------------------------------------------------------
 get_data(m3)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 m4 <- pisaUSA15[1:100, ] %>%
     select(broad_interest, enjoyment, self_efficacy) %>%
     single_imputation() %>% 
@@ -82,6 +97,6 @@ m4 <- pisaUSA15[1:100, ] %>%
 
 get_data(m4)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 get_fit(m4)
 

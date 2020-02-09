@@ -42,7 +42,8 @@
 #' in the \code{models} argument (e.g., \code{models = 1}, or
 #' \code{models = c(1, 2, 3)}), or specify the variances/covariances to be
 #' estimated (e.g.,: \code{variances = c("equal", "varying"), covariances =
-#' c("zero", "equal")}).
+#' c("zero", "equal")}). Note that when mclust is used, \code{models =
+#' c(1, 2, 3, 6)} are the only models available.
 #' @examples
 #'
 #' iris_sample <- iris[c(1:4, 51:54, 101:104), ] # to make example run more quickly
@@ -331,7 +332,7 @@ get_data.tidyLPA <- function(x, ...) {
         cl[[1]] <- as.name("get_data")
         return(eval.parent(cl))
     }
-    as_tibble(do.call(get_long_data, as.list(cl[-1])))
+    as_tibble(do.call(.get_long_data, as.list(cl[-1])))
 }
 
 #' @describeIn get_data Get data for a single latent profile analysis object,
@@ -348,7 +349,10 @@ get_data.tidyProfile <- function(x, ...) {
 
 # Internal ----------------------------------------------------------------
 
-get_long_data <- function(x, ...) {
+.get_long_data <- function(x, ...) {
+    if(inherits(x, "tidyProfile")){
+        x <- list(x)
+    }
     out <- lapply(x, function(x) {
         if(!is.null(x[["dff"]])){
             dt <- data.frame(x[["dff"]])
@@ -412,6 +416,9 @@ print.tidyLPA <-
              na.print = "",
              ...) {
         fits <- get_fit(x)
+        if(all(is.na(fits[, -c(1,2)]))){
+            stop("This tidyLPA analysis does not contain any valid results. Most likely, all models failed to converge.", call. = FALSE)
+        }
         dat <- as.matrix(fits[, c("Model", "Classes", stats)])
         miss_val <- is.na(dat)
         #dat$Model <- paste("Model ", dat$Model)
