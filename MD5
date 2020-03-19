@@ -1,7 +1,7 @@
-322550ac3e25afc56d9f97ef4b6296f5 *DESCRIPTION
+b4a4c30bc3e69d65ef657ab91ef917af *DESCRIPTION
 f0b3ac326ed78d63167dd9d1abb016c6 *LICENSE
 f09c1a73edb2e6e32f3785cb0a30b86e *NAMESPACE
-29e5caae8573a2678b842ff3a732f3a2 *NEWS.md
+9986c8c60cf569eadb673a71a349e003 *NEWS.md
 ca8014d20078c2dc0c79eb39afe202d9 *R/as.tidyLPA.r
 4d2ffdb3d78036fb2cceea88a37dfaf3 *R/calc_functions.R
 672177e01768bc64bc5bbc1a88592f1f *R/compare-solutions.R
@@ -25,13 +25,13 @@ b2363583277595360d539bbe616a390c *R/id_edu.R
 83611efc296e83cc6a42ca6053755f98 *data/empathy.csv
 6bd780561e994b28ef833431bef8df6b *data/id_edu.csv
 99cf0d0450365ea66d0447f677ef8f8a *data/pisaUSA15.rda
-ae9dd748dada3557dd9a0db9526eb9f5 *inst/CITATION
+038475011098014e599867cf660c4831 *inst/CITATION
 4f7240984c01aab80f36d046b18161bf *inst/doc/Introduction_to_tidyLPA.R
-70670566576972f33e8947c9d2b8ca40 *inst/doc/Introduction_to_tidyLPA.Rmd
-4e04166423ef4b02612242672856cd73 *inst/doc/Introduction_to_tidyLPA.html
+6e486973ed8cdcba00f575013c622b3f *inst/doc/Introduction_to_tidyLPA.Rmd
+ddcd8693a942fa51ace411241ffaf914 *inst/doc/Introduction_to_tidyLPA.html
 fc99f9a131ee92fb06fba9b9c68b519a *inst/doc/benchmarking-mclust-and-mplus.R
 290f7e53298b5556d9ea9190abc760e0 *inst/doc/benchmarking-mclust-and-mplus.Rmd
-5d165d192f08433660f7b94921bb0b9a *inst/doc/benchmarking-mclust-and-mplus.html
+98f236fb3e92b286f067780e5f417edc *inst/doc/benchmarking-mclust-and-mplus.html
 aafd8a26c6dccb13f2a018c5d41ad030 *man/AHP.Rd
 d2e4860e5522eb6919f31e06179a4bc7 *man/as.tidyLPA.Rd
 acda494b72bca62825617ae2c01e7e45 *man/calc_lrt.Rd
@@ -59,7 +59,6 @@ a4927702ad6ab093f420ed3d9649db9b *man/plot_profiles.Rd
 febc101b61f2739108c202488953da41 *man/print.tidyLPA.Rd
 43986f2cc528147d3183dcf4d5192411 *man/print.tidyProfile.Rd
 c1e4557b65f57f334d089843f3b50c9a *man/single_imputation.Rd
-0364bcdac09c1dbd57f077c4247e6f15 *man/tidyLPA-deprecated.Rd
 d88a9230220d14d5560cae854d5f9c8d *man/tidyLPA.Rd
 50b218e1b719d4496f78b4e6f254666a *tests/testthat.R
 64848a0023a993923fa7a3a621a8d82e *tests/testthat/test-compare-fit-stats.R
@@ -71,5 +70,5 @@ e1e4e6d1f9583219b18a63dc5d9fe8f7 *tests/testthat/test-estimate-profiles-mclust.R
 ad8cb5c102bf24a30135486fb35d6c03 *tests/testthat/test-pipe.R
 19d44a19a7d3020eb41e3473e1c7c81f *tests/testthat/test-plot-mixtures.R
 1b5ea4b6ba60a8040a2879fe3ece6ec2 *tests/testthat/test-plot-profiles.R
-70670566576972f33e8947c9d2b8ca40 *vignettes/Introduction_to_tidyLPA.Rmd
+6e486973ed8cdcba00f575013c622b3f *vignettes/Introduction_to_tidyLPA.Rmd
 290f7e53298b5556d9ea9190abc760e0 *vignettes/benchmarking-mclust-and-mplus.Rmd

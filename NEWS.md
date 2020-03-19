@@ -1,3 +1,6 @@
+# tidyLPA 1.0.6
+* Correction citation to refer to JOSS paper
+
 # tidyLPA 1.0.5
 * Add C. J. van Lissa as author on JOSS paper
 * Fix bug re. passing additional parameters to mplusObject()
