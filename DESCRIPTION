@@ -2,12 +2,12 @@ Type: Package
 Package: tidyLPA
 Title: Easily Carry Out Latent Profile Analysis (LPA) Using Open-Source
         or Commercial Software
-Version: 1.0.7
+Version: 1.0.8
 Authors@R: 
     c(person(given = c("Joshua", "M"),
              family = "Rosenberg",
              role = c("aut", "cre"),
-             email = "jmichaelrosenberg@gmail.com"),
+             email = "jmrosenberg@utk.edu"),
       person(given = "Caspar",
              family = "van Lissa",
              role = "aut",
@@ -28,7 +28,7 @@ Authors@R:
              family = "Schell",
              role = "ctb",
              email = "schellma@msu.edu"))
-Maintainer: Joshua M Rosenberg <jmichaelrosenberg@gmail.com>
+Maintainer: Joshua M Rosenberg <jmrosenberg@utk.edu>
 Description: An interface to the 'mclust' package to easily
     carry out latent profile analysis ("LPA"). Provides functionality to
     estimate commonly-specified models. Follows a tidy approach, in that
@@ -41,13 +41,14 @@ BugReports: https://github.com/data-edu/tidyLPA/issues
 Depends: R (>= 2.10)
 Imports: dplyr, ggplot2, gtable, grid, mclust, methods, mix,
         MplusAutomation, tibble
-Suggests: knitr, missForest, parallel, rmarkdown, testthat
+Suggests: knitr, lme4, missForest, parallel, pillar, rmarkdown,
+        testthat
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2020-05-13 13:07:44 UTC; jrosenb8
+Packaged: 2020-08-12 10:31:04 UTC; jrosenb8
 Author: Joshua M Rosenberg [aut, cre],
   Caspar van Lissa [aut],
   Jennifer A Schmidt [ctb],
@@ -55,4 +56,4 @@ Author: Joshua M Rosenberg [aut, cre],
   Daniel Anderson [ctb],
   Matthew J. Schell [ctb]
 Repository: CRAN
-Date/Publication: 2020-05-13 13:30:02 UTC
+Date/Publication: 2020-08-17 16:40:02 UTC
